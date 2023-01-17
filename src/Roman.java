@@ -1,58 +1,67 @@
 public final class Roman {
-    final static String[] letter = {"I", "V", "X", "L", "C", "D", "M"};
+    final static int[] dividers = {1, 5, 10, 50, 100, 500, 1000};
+    final static String[] letters = {"I", "V", "X", "L", "C", "D", "M"};
 
     public static String asRomanNumber(int num) {
         assert num > 0;
-        String romanNum = "";
+        StringBuilder romanNum = new StringBuilder();
 
-        int quotient = num / 5;
-        int remainder = num % 5;
+        for (int index = dividers.length - 1; index >= 0; index--) {
+            int devider = dividers[index];
 
-        if (quotient == 0) {
-            if (remainder > 3) {
-                romanNum += letter[0] + letter[quotient + 1];
-            }
-            else {
-                romanNum += addIII(letter[0], remainder);
-            }
-        }
-        else {
-            if (quotient == 1) {
-                if (remainder > 3) {
-                    romanNum += letter[0] + letter[quotient + 1];
+            if (devider <= num) {
+                int quotient = num / devider;
+                int remainder = num % devider;
+                boolean power10 = index % 2 == 0;  // 1, 10, 100, 1000
+
+                if (power10) {
+                    romanNum.append(addUnits(index, quotient));
                 }
                 else {
-                    romanNum += letter[quotient];
-                    romanNum += addIII(letter[0], remainder);
+                    romanNum.append(addTenths(index, quotient, remainder));
+                    int x4 = 4 * dividers[index - 1];
+
+                    if (remainder >= x4) {
+                        num -= x4;
+                    }
                 }
+
+                num -= quotient * devider;
             }
         }
 
-//        if (num <= 3) {
-//            romanNum = addIII(num);
-//        }
-//        else {
-//            if (num < 5) {
-//                romanNum = "IV";
-//            }
-//            else {
-//                if (num <= 8) {
-//                    romanNum = "V";
-//
-//                    if (num > 5) {
-//                        romanNum += addIII(num - 5);
-//                    }
-//                }
-//                else {
-//                    romanNum = "IX";
-//                }
-//            }
-//        }
-
-        return romanNum;
+        return romanNum.toString();
     }
 
     private static String addIII(String letter, int numI) {
         return letter.repeat(Math.max(0, numI));
+    }
+
+    private static String addUnits(int index, int quotient) {
+        String result = "";
+
+        if (quotient == 4) {
+            result += letters[index];
+            result += letters[index + 1];
+        } else {
+            result += addIII(letters[index], quotient);
+        }
+
+        return result;
+    }
+
+    private static String addTenths(int index, int quotient, int remainder) {
+        String result = "";
+
+        int iv = 4 * dividers[index - 1];
+
+        if (remainder >= iv) {
+            result += letters[index - 1];
+            result += letters[index + 1];
+        } else {
+            result += addIII(letters[index], quotient);
+        }
+
+        return result;
     }
 }
